@@ -21,9 +21,9 @@ func init() {
 // RegisterEvent return the major id
 func RegisterEvent() echo.HandlerFunc{
   return func(c echo.Context) error {
-    fmt.Print("aaaaa")
+    fmt.Println("RegisterEvent")
     event := getPostEvent(c)
-    pp.Print(event)
+    pp.Println(event)
     //fmt.Print("ddddd")
 
 
@@ -49,7 +49,7 @@ func RegisterEvent() echo.HandlerFunc{
       return err
     }
     */
-    //fmt.Print("eeeee")
+    event.Major = GenerateMajor()
     CreateEvent(event)
     //return c.JSON(http.StatusOK, event)
   	return c.JSON(http.StatusOK, NewSuccess(event))
