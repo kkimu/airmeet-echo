@@ -6,6 +6,7 @@ import (
   "github.com/jinzhu/gorm"
   "math/rand"
   "time"
+  "github.com/k0kubun/pp"
 )
 
 var db *gorm.DB
@@ -28,7 +29,9 @@ func CreateEvent(event *Event) {
   //db.Save(&event)
 }
 
-func GenerateMajor() uint16 {
+
+
+func GenerateMajor() int {
   rand.Seed(time.Now().UnixNano())
 
   var major int
@@ -42,6 +45,28 @@ func GenerateMajor() uint16 {
       break
     }
   }
-  fmt.Println("major16 = ",uint16(major))
-  return uint16(major)
+
+  return major
+}
+
+func GetEvent(major int) (*Event, error) {
+  var event Event
+  fmt.Println(major)
+  if err := db.Where("major = ?", major).First(&event).Error; err != nil {
+    return nil, err
+  }
+  pp.Println(&event)
+  return &event, nil
+}
+
+func DeleteEvent(major int) (*Event, error) {
+  var event Event
+  if err := db.Where("major = ?", major).First(&event).Error; err != nil {
+    return nil, err
+  }
+  if err := db.Where("major = ?", major).Delete(&event).Error; err != nil {
+    return nil, err
+  }
+  pp.Println(event)
+  return &event, nil
 }

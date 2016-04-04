@@ -4,10 +4,11 @@ import (
   "fmt"
   "net/http"
   "time"
-  //"gopkg.in/validator.v2"
+
   "gopkg.in/go-playground/validator.v8"
   "github.com/labstack/echo"
   "github.com/k0kubun/pp"
+  "strconv"
 )
 
 var validate *validator.Validate
@@ -18,50 +19,59 @@ func init() {
 }
 
 
-// RegisterEvent return the major id
-func RegisterEvent() echo.HandlerFunc{
-  return func(c echo.Context) error {
-    fmt.Println("RegisterEvent")
-    event := getPostEvent(c)
-    pp.Println(event)
-    //fmt.Print("ddddd")
+// イベントを新規登録
+func RegisterEvent(c echo.Context) error {
+  fmt.Println("RegisterEvent")
+  event := getPostEvent(c)
+  pp.Println(event)
 
+  if errs := validate.Struct(event); errs != nil {
+    fmt.Println(errs)
+    return c.JSON(http.StatusOK, NewError(400, fmt.Sprintf("%s",errs)))
+  }
 
-    if errs := validate.Struct(event); errs != nil {
-      fmt.Print("errrrrrrrrrrrrrr\n")
-      fmt.Println(errs)
-      /*
-      err := errs.(validator.ValidationErrors)["Event.EventName"]
-      fmt.Println(err.Field) // output: City
-      fmt.Println(err.Tag)   // output: required
-      fmt.Println(err.Kind)  // output: string
-      fmt.Println(err.Type)  // output: string
-      fmt.Println(err.Param) // output:
-      fmt.Println(err.Value)
-      */
-      return c.JSON(http.StatusOK, NewError(400, fmt.Sprintf("%s",errs)))
-    }
+  event.Major = GenerateMajor()
+  CreateEvent(event)
+	return c.JSON(http.StatusOK, NewSuccess(event))
+}
 
-    /*
-    if err := c.Bind(event); err != nil {
-      fmt.Print("errrrrrrrrrrrrrr\n")
-      //return echo.NewHTTPError(http.StatusBadRequest)
-      return err
-    }
-    */
-    event.Major = GenerateMajor()
-    CreateEvent(event)
-    //return c.JSON(http.StatusOK, event)
-  	return c.JSON(http.StatusOK, NewSuccess(event))
+// イベント情報を取得
+func GetEventInfo(c echo.Context) error {
+  fmt.Println("GetEventInfo")
+  major, err := strconv.Atoi(c.Param("major"))
+  if err != nil || major < 0 || 65535 < major {
+    return c.JSON(http.StatusBadRequest, NewError(400, "major is invalid"))
+  }
+
+  event, err := GetEvent(major)
+  if err != nil {
+    return c.JSON(http.StatusNotFound, NewError(400, fmt.Sprintf("%s",err)))
+  } else {
+    return c.JSON(http.StatusOK, NewSuccess(event))
+  }
+}
+
+// イベントを削除
+func RemoveEvent(c echo.Context) error {
+  fmt.Println("RemoveEvent")
+  major, err := strconv.Atoi(c.Param("major"))
+  if err != nil || major < 0 || 65535 < major {
+    return c.JSON(http.StatusBadRequest, NewError(400, "major is invalid"))
+  }
+
+  event, err := DeleteEvent(major)
+  if err != nil {
+    return c.JSON(http.StatusNotFound, NewError(400, fmt.Sprintf("%s",err)))
+  } else {
+    return c.JSON(http.StatusOK, NewSuccess(event))
   }
 }
 
 // Parse the request body, check input data
 func getPostEvent(c echo.Context) *Event {
-  //fmt.Print("bbbbb")
   // リクエストボディをパースして代入
-  en,rn,desc,items := c.Form("eventName"),c.Form("roomName"),c.Form("description"),c.Form("items")
-  //fmt.Print("ccccc")
+  en,rn,desc,items := c.FormValue("eventName"),c.FormValue("roomName"),c.FormValue("description"),c.FormValue("items")
+
   return &Event{
       EventName: en,
       RoomName:	rn,

@@ -15,6 +15,9 @@ func hello() echo.HandlerFunc {
 	}
 }
 
+func test(c echo.Context) error {
+	return c.JSON(http.StatusOK, "a")
+}
 func main() {
 	// Echo instance
 	e := echo.New()
@@ -25,8 +28,11 @@ func main() {
 
 	// Routes
 	e.Get("/", hello())
-  e.Post("/registerEvent", RegisterEvent())
+  e.Post("/events", RegisterEvent)
+  e.Get("/events/:major", GetEventInfo)
+  e.Delete("/events/:major", RemoveEvent)
 
+	e.Get("/test",test)
 	// Start server
 	e.Run(standard.New(":3000"))
 }
