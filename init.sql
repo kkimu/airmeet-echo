@@ -9,7 +9,18 @@ create table events(
   description varchar(64),
   items varchar(64),
   major int(5),
-  active boolean not null default true,
   created_at datetime,
   deleted_at datetime
-)
+);
+
+create table users(
+  id int(10) auto_increment primary key,
+  user_name varchar(64) not null,
+  profile varchar(64),
+  items varchar(64),
+  major int(5),
+  image varchar(128),
+  image_header varchar(128),
+  created_at datetime,
+  deleted_at datetime
+);

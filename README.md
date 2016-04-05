@@ -143,7 +143,7 @@ http://******/event_info
 ## <a id ="register_user">イベントへのユーザの登録</a>
 
 ### リクエストURL
-http://******/register_user
+http://******/users/:major
 
 メソッド:POST
 

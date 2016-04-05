@@ -29,8 +29,6 @@ func CreateEvent(event *Event) {
   //db.Save(&event)
 }
 
-
-
 func GenerateMajor() int {
   rand.Seed(time.Now().UnixNano())
 
@@ -51,7 +49,7 @@ func GenerateMajor() int {
 
 func GetEvent(major int) (*Event, error) {
   var event Event
-  fmt.Println(major)
+
   if err := db.Where("major = ?", major).First(&event).Error; err != nil {
     return nil, err
   }
@@ -69,4 +67,18 @@ func DeleteEvent(major int) (*Event, error) {
   }
   pp.Println(event)
   return &event, nil
+}
+
+func CreateUser(user *User) {
+  //db.NewRecord(event)
+  db.Create(&user)
+  //db.Save(&event)
+}
+
+func EventExist(major int) error {
+  var event Event
+  if err := db.Where("major = ?", major).First(&event).Error; err != nil {
+    return err
+  }
+  return nil
 }

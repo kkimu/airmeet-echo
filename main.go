@@ -15,9 +15,6 @@ func hello() echo.HandlerFunc {
 	}
 }
 
-func test(c echo.Context) error {
-	return c.JSON(http.StatusOK, "a")
-}
 func main() {
 	// Echo instance
 	e := echo.New()
@@ -32,7 +29,9 @@ func main() {
   e.Get("/events/:major", GetEventInfo)
   e.Delete("/events/:major", RemoveEvent)
 
-	e.Get("/test",test)
+	e.Post("/users", RegisterUser)
+	e.Get("/users/:major/:id", GetUser)
+	e.Delete("/users/:id", RemoveUser)
 	// Start server
 	e.Run(standard.New(":3000"))
 }
