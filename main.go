@@ -25,9 +25,9 @@ func main() {
 
 	// Routes
 	e.Get("/", hello())
-  e.Post("/events", RegisterEvent)
-  e.Get("/events/:major", GetEventInfo)
-  e.Delete("/events/:major", RemoveEvent)
+	e.Post("/events", RegisterEvent)
+	e.Get("/events/:major", GetEventInfo)
+	e.Delete("/events/:major", RemoveEvent)
 
 	e.Post("/users", RegisterUser)
 	e.Get("/users/:major/:id", GetUser)
