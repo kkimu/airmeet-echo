@@ -10,6 +10,7 @@ import (
 
 	"github.com/k0kubun/pp"
 	"github.com/labstack/echo"
+	"github.com/satori/go.uuid"
 	"gopkg.in/go-playground/validator.v8"
 )
 
@@ -85,31 +86,22 @@ func getPostEvent(c echo.Context) *Event {
 
 // RegisterUser ユーザを新規登録
 func RegisterUser(c echo.Context) error {
-	fmt.Println("RegisterUser")
+	// UUID生成
+	u := uuid.NewV4().String()
+	fmt.Printf("UUIDv4: %s\n", u)
 
 	user := getPostUser(c)
 
-	image, err := c.FormFile("image")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, NewError(400, "file error"))
+	user.ID = u
+
+	err1 := imageSave(c, "image", u+".jpg")
+	if err1 != nil {
+		return c.JSON(http.StatusNotFound, NewError(400, fmt.Sprintf("%s", err1)))
 	}
 
-	src, err := image.Open()
-	if err != nil {
-		return err
-	}
-	defer src.Close()
-
-	// Destination
-	dst, err := os.Create(image.Filename)
-	if err != nil {
-		return err
-	}
-	defer dst.Close()
-
-	// Copy
-	if _, err = io.Copy(dst, src); err != nil {
-		return err
+	err2 := imageSave(c, "image_header", u+"_header.jpg")
+	if err2 != nil {
+		return c.JSON(http.StatusNotFound, NewError(400, fmt.Sprintf("%s", err2)))
 	}
 
 	major, err := majorConfirm(c)
@@ -125,6 +117,31 @@ func RegisterUser(c echo.Context) error {
 
 	CreateUser(user)
 	return c.JSON(http.StatusOK, NewSuccess(user))
+}
+
+func imageSave(c echo.Context, input string, fname string) error {
+	img, err := c.FormFile(input)
+	if err != nil {
+		return err
+	}
+	src, err := img.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	// Destination
+	dst, err := os.Create("image/" + fname)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
+	return nil
 }
 
 // GetUser ユーザを取得
@@ -162,15 +179,13 @@ func RemoveUser(c echo.Context) error {
 // Parse the request body, check input data
 func getPostUser(c echo.Context) *User {
 	// リクエストボディをパースして代入
-	un, prof, items, img, imgh := c.FormValue("name"), c.FormValue("profile"), c.FormValue("items"), c.FormValue("image"), c.FormValue("image_header")
+	un, prof, items := c.FormValue("name"), c.FormValue("profile"), c.FormValue("items")
 
 	return &User{
-		UserName:    un,
-		Profile:     prof,
-		Items:       items,
-		Image:       img,
-		ImageHeader: imgh,
-		CreatedAt:   time.Now(),
+		UserName:  un,
+		Profile:   prof,
+		Items:     items,
+		CreatedAt: time.Now(),
 	}
 }
 

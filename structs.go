@@ -1,8 +1,6 @@
 package main
 
-import (
-	"time"
-)
+import "time"
 
 // Event イベント
 type Event struct {
@@ -18,7 +16,7 @@ type Event struct {
 
 // User ユーザ
 type User struct {
-	ID          int        `json:"id"`
+	ID          string     `json:"id"`
 	UserName    string     `json:"user_name" validate:"required"`
 	Profile     string     `json:"profile"`
 	Items       string     `json:"items" validate:"required"`

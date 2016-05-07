@@ -1,3 +1,4 @@
 template.sh
 init.sql
 *.tmp
+image/
