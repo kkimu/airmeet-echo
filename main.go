@@ -8,11 +8,9 @@ import (
 	"github.com/labstack/echo/middleware"
 )
 
-// Handler
-func hello() echo.HandlerFunc {
-	return func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!\n")
-	}
+// Hello Handler
+func Hello(c echo.Context) error {
+	return c.String(http.StatusOK, "Hello, World!")
 }
 
 func main() {
@@ -24,14 +22,14 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// Routes
-	e.Get("/", hello())
+	e.Get("/", Hello)
 	e.Post("/events", RegisterEvent)
 	e.Get("/events/:major", GetEventInfo)
 	e.Delete("/events/:major", RemoveEvent)
 
-	e.Post("/users", RegisterUser)
+	e.Post("/users/:major", RegisterUser)
 	e.Get("/users/:major/:id", GetUser)
-	e.Delete("/users/:id", RemoveUser)
+	e.Delete("/users/:major/:id", RemoveUser)
 	// Start server
 	e.Run(standard.New(":3000"))
 }

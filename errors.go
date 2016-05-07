@@ -35,9 +35,9 @@ type Success struct {
 }
 
 // NewSuccess 新しいSuccessを作成
-func NewSuccess(event *Event) *Success {
+func NewSuccess(result interface{}) *Success {
 	return &Success{
-		Result: event,
+		Result: result,
 		Code:   200,
 	}
 }

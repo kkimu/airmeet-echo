@@ -96,15 +96,11 @@ func RegisterUser(c echo.Context) error {
 	pp.Println(user)
 
 	if errs := validate.Struct(user); errs != nil {
-		fmt.Println(errs)
 		return c.JSON(http.StatusOK, NewError(400, fmt.Sprintf("%s", errs)))
 	}
 
 	CreateUser(user)
-	return c.JSON(http.StatusOK, &Success{
-		Result: user,
-		Code:   200,
-	})
+	return c.JSON(http.StatusOK, NewSuccess(user))
 }
 
 // GetUser ユーザを取得
@@ -155,7 +151,7 @@ func getPostUser(c echo.Context) *User {
 }
 
 func majorConfirm(c echo.Context) (int, error) {
-	major, err1 := strconv.Atoi(c.FormValue("major"))
+	major, err1 := strconv.Atoi(c.Param("major"))
 	if err1 != nil || major < 0 || 65535 < major {
 		return -1, err1
 	}

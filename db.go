@@ -83,6 +83,7 @@ func CreateUser(user *User) {
 // EventExist 指定されたmajorのイベントが存在するか確認
 func EventExist(major int) error {
 	var event Event
+	fmt.Println(major)
 	if err := db.Where("major = ?", major).First(&event).Error; err != nil {
 		return err
 	}
