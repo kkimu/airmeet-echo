@@ -2,15 +2,15 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"net/http"
-	"time"
-
-	"gopkg.in/go-playground/validator.v8"
-
+	"os"
 	"strconv"
+	"time"
 
 	"github.com/k0kubun/pp"
 	"github.com/labstack/echo"
+	"gopkg.in/go-playground/validator.v8"
 )
 
 var validate *validator.Validate
@@ -86,7 +86,31 @@ func getPostEvent(c echo.Context) *Event {
 // RegisterUser ユーザを新規登録
 func RegisterUser(c echo.Context) error {
 	fmt.Println("RegisterUser")
+
 	user := getPostUser(c)
+
+	image, err := c.FormFile("image")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, NewError(400, "file error"))
+	}
+
+	src, err := image.Open()
+	if err != nil {
+		return err
+	}
+	defer src.Close()
+
+	// Destination
+	dst, err := os.Create(image.Filename)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+
+	// Copy
+	if _, err = io.Copy(dst, src); err != nil {
+		return err
+	}
 
 	major, err := majorConfirm(c)
 	if err != nil || major < 0 || 65535 < major {
