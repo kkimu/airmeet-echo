@@ -2,3 +2,6 @@ template.sh
 init.sql
 *.tmp
 image/
+src/
+pkg/
+.gvm_loval

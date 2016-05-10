@@ -28,7 +28,7 @@ func main() {
 	e.Delete("/events/:major", RemoveEvent)
 
 	e.Post("/users/:major", RegisterUser)
-	e.Get("/users/:major/:id", GetUser)
+	e.Get("/users/:major", GetParticipants)
 	e.Delete("/users/:major/:id", RemoveUser)
 	// Start server
 	e.Run(standard.New(":3000"))

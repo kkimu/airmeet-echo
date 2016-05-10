@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -13,8 +14,13 @@ import (
 var db *gorm.DB
 
 func init() {
+	ip := os.Getenv("MYSQL_PORT_3306_TCP_ADDR")
 	var err error
-	db, err = gorm.Open("mysql", "root:pass@tcp(127.0.0.1:3306)/airmeet?parseTime=True&loc=Japan")
+	if ip != "" {
+		db, err = gorm.Open("mysql", "root:mysql@tcp("+ip+":3306)/airmeet?parseTime=True&loc=Japan")
+	} else {
+		db, err = gorm.Open("mysql", "root:mysql@tcp(127.0.0.1:3306)/airmeet?parseTime=True&loc=Japan")
+	}
 
 	if err != nil {
 		panic("failed to connect database")
@@ -80,6 +86,17 @@ func CreateUser(user *User) {
 	//db.Save(&event)
 }
 
+// GetUsers 指定されたmajorのイベントの参加者を取得
+func GetUsers(major int) (*[]User, error) {
+	var users []User
+
+	if err := db.Where("major = ?", major).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	pp.Println(&users)
+	return &users, nil
+}
+
 // EventExist 指定されたmajorのイベントが存在するか確認
 func EventExist(major int) error {
 	var event Event
@@ -88,4 +105,17 @@ func EventExist(major int) error {
 		return err
 	}
 	return nil
+}
+
+// DeleteUser 指定されたmajorのイベントがあるか確認し、あれば削除
+func DeleteUser(id string) (*User, error) {
+	var user User
+	if err := db.Where("id = ?", id).First(&user).Error; err != nil {
+		return nil, err
+	}
+	if err := db.Where("id = ?", id).Delete(&user).Error; err != nil {
+		return nil, err
+	}
+	pp.Println(user)
+	return &user, nil
 }

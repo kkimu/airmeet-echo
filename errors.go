@@ -31,7 +31,7 @@ func NewError(code int, msg string) *Error {
 // Success 成功
 type Success struct {
 	Result interface{} `json:"result"`
-	Code   int
+	Code   int         `json:"code"`
 }
 
 // NewSuccess 新しいSuccessを作成

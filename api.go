@@ -103,9 +103,11 @@ func RegisterUser(c echo.Context) error {
 	if err2 != nil {
 		return c.JSON(http.StatusNotFound, NewError(400, fmt.Sprintf("%s", err2)))
 	}
-
-	major, err := majorConfirm(c)
+	major, err := strconv.Atoi(c.Param("major"))
 	if err != nil || major < 0 || 65535 < major {
+		return c.JSON(http.StatusBadRequest, NewError(400, "major is invalid"))
+	}
+	if err := EventExist(major); err != nil {
 		return c.JSON(http.StatusBadRequest, NewError(400, fmt.Sprintf("%s", err)))
 	}
 	user.Major = major
@@ -144,36 +146,42 @@ func imageSave(c echo.Context, input string, fname string) error {
 	return nil
 }
 
-// GetUser ユーザを取得
-func GetUser(c echo.Context) error {
-	fmt.Println("GetUser")
+// GetParticipants ユーザを取得
+func GetParticipants(c echo.Context) error {
 	major, err := strconv.Atoi(c.Param("major"))
 	if err != nil || major < 0 || 65535 < major {
 		return c.JSON(http.StatusBadRequest, NewError(400, "major is invalid"))
 	}
+	if err := EventExist(major); err != nil {
+		return c.JSON(http.StatusBadRequest, NewError(400, fmt.Sprintf("%s", err)))
+	}
 
-	event, err := GetEvent(major)
+	users, err := GetUsers(major)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, NewError(400, fmt.Sprintf("%s", err)))
 	}
 
-	return c.JSON(http.StatusOK, NewSuccess(event))
+	return c.JSON(http.StatusOK, NewSuccess(users))
 }
 
 // RemoveUser ユーザを削除
 func RemoveUser(c echo.Context) error {
-	fmt.Println("RemoveEvent")
 	major, err := strconv.Atoi(c.Param("major"))
 	if err != nil || major < 0 || 65535 < major {
 		return c.JSON(http.StatusBadRequest, NewError(400, "major is invalid"))
 	}
+	if err := EventExist(major); err != nil {
+		return c.JSON(http.StatusBadRequest, NewError(400, fmt.Sprintf("%s", err)))
+	}
+	fmt.Println("delete")
+	id := c.Param("id")
 
-	event, err := DeleteEvent(major)
+	user, err := DeleteUser(id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, NewError(400, fmt.Sprintf("%s", err)))
 	}
 
-	return c.JSON(http.StatusOK, NewSuccess(event))
+	return c.JSON(http.StatusOK, NewSuccess(user))
 }
 
 // Parse the request body, check input data
@@ -187,15 +195,4 @@ func getPostUser(c echo.Context) *User {
 		Items:     items,
 		CreatedAt: time.Now(),
 	}
-}
-
-func majorConfirm(c echo.Context) (int, error) {
-	major, err1 := strconv.Atoi(c.Param("major"))
-	if err1 != nil || major < 0 || 65535 < major {
-		return -1, err1
-	}
-	if err2 := EventExist(major); err2 != nil {
-		return -1, err2
-	}
-	return major, nil
 }
